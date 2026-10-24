@@ -1,0 +1,6 @@
+﻿Create a Python agent in the agent/ folder. In llm.py, use the openai package with
+base URL MODEL_BASE_URL, key MODEL_API_KEY and model NEMOTRON_MODEL, all read
+from .env. Give the agent one tool, run_sql, which sends one SQL statement to
+Zetaris with a POST to ZETARIS_REST_URL + /sql-editor/sqls/run, using
+ZETARIS_API_KEY as a bearer token plus X-Org-ID and a fresh UUID X-Request-ID
+header, and returns the rows. Keep all secrets in .env and explain each file.
