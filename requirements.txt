@@ -1,0 +1,10 @@
+# Core
+openai>=1.40.0
+python-dotenv>=1.0.1
+requests>=2.32.3
+
+# Optional: for H-MEM integration
+# hmem>=0.1.0
+
+# Optional: for testing
+pytest>=8.0.0
