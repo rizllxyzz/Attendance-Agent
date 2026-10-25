@@ -45,7 +45,8 @@ $evolutionUrl = wa_env('EVOLUTION_URL', 'http://evolution:8080');
 $evolutionKey = wa_env('EVOLUTION_API_KEY', 'hackathon-key');
 $evolutionInstance = wa_env('EVOLUTION_INSTANCE', 'presensi');
 $webhookToken = wa_env('WHATSAPP_WEBHOOK_TOKEN');
-if ($webhookToken !== '' && !hash_equals($webhookToken, (string) ($_SERVER['HTTP_X_WHATSAPP_WEBHOOK_TOKEN'] ?? ''))) {
+// Token check only enforced for Meta provider (Evolution is internal Docker network)
+if ($provider === 'meta' && $webhookToken !== '' && !hash_equals($webhookToken, (string) ($_SERVER['HTTP_X_WHATSAPP_WEBHOOK_TOKEN'] ?? ''))) {
     http_response_code(401); exit('Unauthorized');
 }
 
@@ -120,15 +121,15 @@ $question = $messageText;
 // Try to call agent (reuse ask.php logic via internal include is heavy; do lightweight)
 // We'll call the internal agent endpoint via curl to keep consistent.
 $agentUrl = 'http://127.0.0.1/api/v1/agent/ask.php';
-// Since this runs on same server, use localhost
-$agentUrl = 'http://127.0.0.1' . dirname($_SERVER['SCRIPT_NAME']) . '/../agent/ask.php';
-$agentUrl = 'http://127.0.0.1/api/v1/agent/ask.php';
 
+$agentSharedToken = wa_env('AGENT_SHARED_TOKEN', '');
 $ch = curl_init($agentUrl);
+$headers = ['Content-Type: application/json'];
+if ($agentSharedToken !== '') $headers[] = 'X-Agent-Token: ' . $agentSharedToken;
 curl_setopt_array($ch, [
     CURLOPT_POST => true,
     CURLOPT_POSTFIELDS => json_encode(['question' => $question]),
-    CURLOPT_HTTPHEADER => array_merge(['Content-Type: application/json'], agent_auth_headers()),
+    CURLOPT_HTTPHEADER => $headers,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT => 30,
 ]);

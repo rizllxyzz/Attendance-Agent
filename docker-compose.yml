@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASS:-root}
       MYSQL_DATABASE: ${DB_NAME:-presensi}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
       - ./webapp/database.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -23,7 +23,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8081:80"
+      - "18081:80"
     volumes:
       - ./webapp:/var/www/html
     environment:
@@ -39,6 +39,12 @@ services:
       MODEL_BASE_URL: ${MODEL_BASE_URL:-http://host.docker.internal:8088/v1}
       MODEL_API_KEY: ${MODEL_API_KEY:-}
       NEMOTRON_MODEL: ${NEMOTRON_MODEL:-meterless/auto}
+      WHATSAPP_PROVIDER: ${WHATSAPP_PROVIDER:-evolution}
+      EVOLUTION_URL: http://evolution:8080
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-hackathon-key}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-presensi}
+      WHATSAPP_WEBHOOK_TOKEN: ${WHATSAPP_WEBHOOK_TOKEN:-}
+      AGENT_SHARED_TOKEN: ${AGENT_SHARED_TOKEN:-}
     command: >
       bash -c "a2enmod rewrite && docker-php-ext-install mysqli pdo pdo_mysql && apache2-foreground"
 
@@ -47,7 +53,7 @@ services:
     depends_on:
       - db
     ports:
-      - "8000:8000"
+      - "18000:8000"
     environment:
       SAMPLE_MODE: ${SAMPLE_MODE:-false}
       ZETARIS_REST_URL: ${ZETARIS_REST_URL:-http://host.docker.internal:8888/api/v1.0}
@@ -61,19 +67,41 @@ services:
       DB_USER: root
       DB_PASS: ${DB_PASS:-root}
 
+  # PostgreSQL for Evolution API
+  evolution-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolution
+      POSTGRES_DB: evolution
+    volumes:
+      - evolution_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Evolution API (WhatsApp bot) - auto-start with stack
   evolution:
-    image: atendai/evolution-api:latest
+    image: evoapicloud/evolution-api:latest
+    depends_on:
+      evolution-db:
+        condition: service_healthy
     environment:
       AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-hackathon-key}
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: "postgresql"
+      DATABASE_CONNECTION_URI: "postgresql://evolution:evolution@evolution-db:5432/evolution?schema=public"
       WEBHOOK_GLOBAL_ENABLED: "true"
       WEBHOOK_GLOBAL_URL: "http://web/api/v1/whatsapp/webhook.php"
       WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: "true"
     ports:
-      - "127.0.0.1:8082:8080"
+      - "127.0.0.1:18082:8080"
     volumes:
       - evolution_data:/evolution/store
 
 volumes:
   db_data:
   evolution_data:
+  evolution_pgdata:
