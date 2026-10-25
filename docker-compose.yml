@@ -44,7 +44,7 @@ services:
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-hackathon-key}
       EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-presensi}
       WHATSAPP_WEBHOOK_TOKEN: ${WHATSAPP_WEBHOOK_TOKEN:-}
-      AGENT_SHARED_TOKEN: ${AGENT_SHARED_TOKEN:-}
+      AGENT_SHARED_TOKEN: ${AGENT_SHARED_TOKEN:-hackathon-internal-token}
     command: >
       bash -c "a2enmod rewrite && docker-php-ext-install mysqli pdo pdo_mysql && apache2-foreground"
 

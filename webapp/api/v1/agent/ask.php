@@ -38,10 +38,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 
 $user = current_user();
-if (!$user || !in_array($user['role'] ?? '', ['siswa', 'guru', 'admin'], true)) {
+$internalToken = $_SERVER['HTTP_X_AGENT_TOKEN'] ?? '';
+$isInternal = ($internalToken !== '' && AGENT_SHARED_TOKEN !== '' && hash_equals(AGENT_SHARED_TOKEN, $internalToken));
+
+if (!$isInternal && (!$user || !in_array($user['role'] ?? '', ['siswa', 'guru', 'admin'], true))) {
     json_fail('FORBIDDEN', 'Silakan masuk untuk menggunakan asisten presensi.', 403);
 }
-$userId = (int) $user['id'];
+if ($isInternal && !$user) {
+    $user = ['id' => 0, 'role' => 'admin', 'nama_lengkap' => 'System'];
+}
+$userId = (int) ($user['id'] ?? 0);
 
 $gate = throttle('agent_ask', AGENT_MAX_PER_WINDOW, AGENT_WINDOW_SEC);
 if (!$gate['allowed']) {

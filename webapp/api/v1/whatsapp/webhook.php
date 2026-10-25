@@ -122,7 +122,7 @@ $question = $messageText;
 // We'll call the internal agent endpoint via curl to keep consistent.
 $agentUrl = 'http://127.0.0.1/api/v1/agent/ask.php';
 
-$agentSharedToken = wa_env('AGENT_SHARED_TOKEN', '');
+$agentSharedToken = wa_env('AGENT_SHARED_TOKEN', 'hackathon-internal-token');
 $ch = curl_init($agentUrl);
 $headers = ['Content-Type: application/json'];
 if ($agentSharedToken !== '') $headers[] = 'X-Agent-Token: ' . $agentSharedToken;
