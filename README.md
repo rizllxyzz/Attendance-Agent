@@ -1,88 +1,245 @@
-﻿# Attendance Agent - Open Agent Hackathon 2026
+﻿# 🎓 Presensi School - Smart Attendance System
 
-AI agent for school attendance (presensi) data, built on **Zetaris** as the data
-layer and **Meterless Nightshift** as the primary AI provider.
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED.svg)](Dockerfile)
+[![Hackathon](https://img.shields.io/badge/Open%20Agent%20Hackathon-2026-orange.svg)](https://hackathon.genai.works)
 
-## Features
-- Real `run_sql` calls to Zetaris Data Virtualization (no mocking).
-- Scout Intent Engine (Meterless) classifies query intent for routing.
-- FastAPI `/run` endpoint (programmatic access via curl).
-- `SAMPLE_MODE=true` runs on cached data without live credentials.
+> Smart attendance system with **Face ID**, **GPS verification**, and an **AI assistant** (SmartJournal AI).
+> Built for the **Open Agent Hackathon 2026**.
 
-## Setup
+**Sponsors:** Zetaris (data layer) · Meterless Nightshift (AI provider) · NVIDIA (Nemotron) · Cursor (optional)
+
+---
+
+## 📋 Table of Contents
+1. [Features](#-features)
+2. [Quick Start](#-quick-start-5-menit)
+3. [Full Setup](#-full-setup-lengkap)
+4. [Docker](#-docker-full-stack)
+5. [Agent API](#-agent-api)
+6. [Sample Mode](#-sample-mode)
+7. [Sponsor Technology](#-sponsor-technology)
+8. [Project Structure](#-project-structure)
+9. [Troubleshooting](#-troubleshooting)
+10. [License](#-license)
+
+---
+
+## ✨ Features
+- 👤 **Face ID** enrollment & verification (face-api.js, descriptors only, no photos stored)
+- 📍 **GPS radius** verification with anti-spoofing
+- 🤖 **SmartJournal AI** assistant (chatbot-style) for attendance queries
+- 📊 **Real-time recap** & history per student
+- 📝 **Izin/Sakit** requests with approval flow
+- 🔐 Admin panel: settings, users, classes, reports, AI provider config
+- 🐳 **Docker** full stack (MySQL + PHP + Agent)
+- 🤖 **Python agent** with Zetaris + Scout Intent Engine + Nightshift
+
+---
+
+## ⚡ Quick Start (5 Menit) - Sample Mode
+
+Tanpa kredensial, langsung jalan:
+
 ```bash
-python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# macOS/Linux
-source .venv/bin/activate
-
+git clone https://github.com/rizllxyzz/Attendance-Agent.git
+cd Attendance-Agent
 pip install -r requirements.txt
-cp .env.example .env   # fill in your Zetaris and Nightshift settings
-```
-
-### Zetaris
-1. Run Zetaris locally via Docker Desktop (see Participant Setup Guide).
-2. Create an API key in the Zetaris web UI (http://localhost:3000).
-3. Set `ZETARIS_REST_URL`, `ZETARIS_ORG_ID`, `ZETARIS_API_KEY` in `.env`.
-
-### Meterless Nightshift
-1. Install Nightshift desktop app.
-2. Add NVIDIA API key in Nightshift Providers tab.
-3. Copy Runtime URL + token from Nightshift Console.
-4. Set `MODEL_BASE_URL`, `MODEL_API_KEY`, `NEMOTRON_MODEL` in `.env`.
-
-## Run
-```bash
-# Live mode
-python run.py
-
-# Sample mode (no credentials needed)
 SAMPLE_MODE=true python run.py
 ```
 
-Server listens on http://0.0.0.0:8000.
-
-## Drive it (programmatic)
+Test:
 ```bash
-curl -X POST http://localhost:8000/run \
-  -H "Content-Type: application/json" \
-  -d @input_examples/example_1.json
+curl -X POST http://localhost:8000/run -H "Content-Type: application/json" -d @input_examples/example_1.json
 ```
 
-## Docker
+---
+
+## 📦 Full Setup (Lengkap)
+
+Panduan detail ada di **[SETUP.md](SETUP.md)**. Ringkasnya:
+
+### 1. Database
+```bash
+mysql -u root -p -e "CREATE DATABASE presensi;"
+mysql -u root -p presensi < webapp/database.sql
+```
+
+### 2. Konfigurasi `.env`
+```bash
+cp .env.example .env
+# Edit: DB_*, ZETARIS_*, MODEL_*
+```
+
+### 3. Zetaris (Data Layer)
+```bash
+cd zetaris-platform
+docker compose pull && docker compose up -d
+# Buka http://localhost:3000 -> buat API key -> set ZETARIS_API_KEY
+```
+
+### 4. Meterless Nightshift (AI Provider)
+- Install Nightshift desktop app
+- Add NVIDIA API key di Providers
+- Copy Runtime URL + token -> set `MODEL_BASE_URL`, `MODEL_API_KEY`
+
+### 5. Run Web App
+Start Laragon/XAMPP → buka http://localhost
+
+### 6. Run Agent
+```bash
+python run.py          # live
+SAMPLE_MODE=true python run.py  # sample
+```
+
+---
+
+## 🐳 Docker (Full Stack)
+
+```bash
+docker compose up -d --build
+```
+
+| Service | URL |
+|---|---|
+| Web (PHP) | http://localhost |
+| Agent | http://localhost:8000 |
+| MySQL | localhost:3306 |
+
+Zetaris & Nightshift tetap di host (`host.docker.internal`).
+
+### Agent saja (submission test)
 ```bash
 docker build -t oah-submission .
 docker run --rm -p 8000:8000 --env-file .env oah-submission
-# Sample mode (no credentials):
+# Sample mode
 docker run --rm -p 8000:8000 -e SAMPLE_MODE=true oah-submission
 ```
 
-## Tests (Meterless Engine)
+---
+
+## 🤖 Agent API
+
 ```bash
-pytest tests/ -q
+curl -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{"task": "Siapa yang terlambat hari ini?"}'
 ```
 
-## Sponsor technology
-- **Zetaris**: data layer via REST `run_sql` (see `app/adapters/zetaris.py`).
-- **Meterless Nightshift**: primary AI provider (OpenAI-compatible), see `app/adapters/nightshift.py`.
-- **Meterless Engine**: Scout Intent (`app/engines/scout_intent.py`) classifies query intent for routing.
-- **NVIDIA**: Nemotron models routed through Nightshift.
+Response:
+```json
+{
+  "run_id": "...",
+  "mode": "sample",
+  "intent": "late_report",
+  "handler": "late_report",
+  "answer": "...",
+  "provider": "sample-mode",
+  "trace": [...]
+}
+```
 
-## Traces
-Each `/run` writes JSONL traces to `logs/run.jsonl` and stdout.
+Endpoints:
+- `GET /health` - status
+- `POST /run` - run agent
 
-## Limitations
-- Sample mode uses cached data (`data/sample_cache.json`), not live queries.
-- Live mode requires Zetaris + Nightshift running locally.
-- Scout Intent is rule-based (no LLM), kept lightweight for fast runs.
-PY
-## Web Frontend (PHP)
-The full web app (admin panel + student portal) is included in webapp/.
-Run with Laragon/XAMPP: import webapp/database.sql, set webapp/.env, open http://localhost.
+---
 
+## 🧪 Sample Mode
 
-## Full Stack (Docker Compose)
-Run everything (MySQL + PHP web + agent) in one command:
-\\\ash\ndocker compose up -d --build\n\\\\n- Web: http://localhost\n- Agent: http://localhost:8000\n- DB: localhost:3306\nZetaris & Nightshift run on host (host.docker.internal).
+`SAMPLE_MODE=true` menjalankan agent pada data cache (`data/sample_cache.json`) tanpa kredensial live. Tetap menjalankan logika real (Scout Intent + Writer), bukan replay output.
 
+Untuk juri tanpa setup Zetaris/Nightshift:
+```bash
+docker run --rm -p 8000:8000 -e SAMPLE_MODE=true oah-submission
+curl -X POST http://localhost:8000/run -H "Content-Type: application/json" -d @input_examples/example_1.json
+```
+
+---
+
+## 🏆 Sponsor Technology
+
+| Sponsor | Penggunaan |
+|---|---|
+| **Zetaris** | Data layer. Agent query real attendance via REST `run_sql`. Lihat `config/zetaris.php` & `app/adapters/zetaris.py` |
+| **Meterless Nightshift** | Primary AI provider (OpenAI-compatible). Lihat `app/adapters/nightshift.py` & `/admin/ai-provider.php` |
+| **Meterless Engine** | Scout Intent - klasifikasi maksud user untuk routing (`app/engines/scout_intent.py`) |
+| **NVIDIA** | Nemotron models via Nightshift (best use → DGX Spark) |
+| **Cursor** | Opsional (boleh pakai tool AI coding lain) |
+
+---
+
+## 📁 Project Structure
+
+```
+/
+├── run.py                  # Entry point agent
+├── app/                    # Core agent logic
+│   ├── adapters/           # Zetaris, Nightshift
+│   └── engines/            # Scout Intent (Meterless)
+├── tests/                  # Engine tests (pytest)
+├── input_examples/         # 3 sample inputs
+├── output_examples/        # 3 sample outputs
+├── logs/                   # Traces (runtime, JSONL)
+├── data/                   # Cached sample data
+├── webapp/                 # PHP frontend (admin + siswa)
+├── Dockerfile              # Agent container
+├── docker-compose.yml      # Full stack
+├── .env.example            # Placeholders only
+├── SETUP.md                # Panduan lengkap
+└── README.md
+```
+
+---
+
+## 🧪 Tests
+
+```bash
+pytest tests/ -q
+# Expected: 5 passed
+```
+
+---
+
+## 🔒 Security
+
+- `.env` (berisi key) **tidak** di-commit (ada di `.gitignore`)
+- `.env.example` hanya placeholder
+- Tidak ada API key di source code, README, atau logs
+- Scan: `grep -RIn --exclude-dir=.git -E "(sk-|nvapi-|akaugpd)" .`
+
+---
+
+## 🆘 Troubleshooting
+
+| Masalah | Solusi |
+|---|---|
+| Zetaris unhealthy | Tunggu 3-5 menit, cek `docker compose logs` |
+| Port in use | Ganti port di `.env` |
+| Agent import error | `pip install -r requirements.txt` |
+| Nightshift refused | Pastikan Nightshift app running |
+| Face ID gagal | Butuh HTTPS/localhost |
+| GPS ditolak | Pastikan di area sekolah |
+
+Detail lengkap: **[SETUP.md](SETUP.md)**
+
+---
+
+## 📥 Download
+
+- **Repo**: https://github.com/rizllxyzz/Attendance-Agent
+- **ZIP Release**: https://github.com/rizllxyzz/Attendance-Agent/releases/latest
+- **Panduan**: [SETUP.md](SETUP.md)
+
+---
+
+## 📜 License
+
+MIT - bebas digunakan, dimodifikasi, dan didistribusikan.
+
+---
+
+## 👤 Author
+
+**rizllxyzz** - Open Agent Hackathon 2026 participant.
