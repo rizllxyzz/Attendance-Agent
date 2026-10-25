@@ -291,6 +291,40 @@ Orang tua bisa tanya kehadiran anak via WhatsApp. Agent membalas otomatis.
 - Webhook terima → panggil agent → query Zetaris → balas via WhatsApp API
 - Jawaban instan, real-time
 
+## 📱 WhatsApp Bot (Opsional) - Evolution API (Mudah)
+
+Orang tua bisa tanya kehadiran anak via WhatsApp. Agent membalas otomatis.
+
+### Cara Paling Mudah (Docker)
+```bash
+# Jalankan Evolution API
+docker compose --profile whatsapp up -d
+
+# Buka http://localhost:8081/manager
+# Create instance "presensi" -> scan QR dengan WhatsApp
+```
+
+### Set Webhook
+Di Evolution manager → instance → Webhook:
+- URL: `http://host.docker.internal/api/v1/whatsapp/webhook.php`
+- Events: `messages.upsert`
+
+### Set .env
+```env
+WHATSAPP_PROVIDER=evolution
+EVOLUTION_URL=http://localhost:8081
+EVOLUTION_API_KEY=hackathon-key
+EVOLUTION_INSTANCE=presensi
+```
+
+### Cara Kerja
+- Orang tua chat: "Apakah Andi sudah pulang?"
+- Webhook terima → panggil agent → query Zetaris → balas via Evolution API
+- Jawaban instan, real-time
+
+### Alternatif: Meta Cloud API (Official)
+Butuh HTTPS domain + Meta approval. Lihat `api/v1/whatsapp/webhook.php` (provider=meta).
+
 ## 🆘 Troubleshooting
 
 | Masalah | Solusi |
