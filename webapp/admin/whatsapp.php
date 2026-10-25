@@ -279,8 +279,53 @@ require __DIR__ . '/../templates/admin-head.php';
         }
     });
 
-    // Auto check on load
-    setTimeout(() => document.getElementById('btnStatus').click(), 500);
+    // Auto-setup on load: create instance if needed, show QR if not connected, set webhook
+    async function autoSetup() {
+        const st = await apiCall('status');
+        const state = (st && st.instance && st.instance.state) || (st && st.state) || '';
+        if (st && st.error && (st.error.includes('does not exist') || st.error.includes('not found'))) {
+            // Instance doesn't exist -> create it
+            setStatus('Membuat instance...', instance, true);
+            await apiCall('create');
+            await new Promise(r => setTimeout(r, 1500));
+            const qrRes = await apiCall('qr');
+            const qr = qrRes?.qrcode?.base64 || qrRes?.base64 || qrRes?.code;
+            if (qr) {
+                document.getElementById('qrImage').src = qr.startsWith('data:') ? qr : 'data:image/png;base64,' + qr;
+                document.getElementById('qrArea').style.display = 'block';
+                setStatus('Scan QR Code', 'Buka WhatsApp -> Perangkat tertaut -> Tautkan perangkat', true);
+            }
+            // Auto-set webhook
+            await apiCall('webhook');
+        } else if (state === 'open') {
+            setStatus('Terhubung', 'WhatsApp sudah terhubung. Bot siap digunakan.', true);
+            document.getElementById('qrArea').style.display = 'none';
+        } else {
+            // Not connected -> show QR
+            const qrRes = await apiCall('qr');
+            const qr = qrRes?.qrcode?.base64 || qrRes?.base64 || qrRes?.code;
+            if (qr) {
+                document.getElementById('qrImage').src = qr.startsWith('data:') ? qr : 'data:image/png;base64,' + qr;
+                document.getElementById('qrArea').style.display = 'block';
+                setStatus('Scan QR Code', 'Buka WhatsApp -> Perangkat tertaut -> Tautkan perangkat', true);
+            } else {
+                setStatus('Menunggu...', 'Klik "Buat Instance" jika belum ada', false);
+            }
+            // Auto-set webhook
+            await apiCall('webhook');
+        }
+    }
+    // Run auto-setup on load
+    setTimeout(autoSetup, 800);
+    // Auto-refresh status every 5s
+    setInterval(async function() {
+        const st = await apiCall('status');
+        const state = (st && st.instance && st.instance.state) || (st && st.state) || '';
+        if (state === 'open') {
+            setStatus('Terhubung', 'WhatsApp sudah terhubung. Bot siap digunakan.', true);
+            document.getElementById('qrArea').style.display = 'none';
+        }
+    }, 5000);
 })();
 </script>
 
