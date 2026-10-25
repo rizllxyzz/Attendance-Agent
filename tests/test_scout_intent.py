@@ -23,6 +23,11 @@ def test_route_known():
     assert route("unknown") == "fallback"
 
 
+def test_report():
+    intent, _ = classify_intent("tolong susunin laporan bulan ini")
+    assert intent == "report"
+
+
 def test_empty():
     intent, conf = classify_intent("")
     assert intent == "unknown"

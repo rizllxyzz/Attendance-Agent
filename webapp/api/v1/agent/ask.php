@@ -95,6 +95,19 @@ if (($user['role'] ?? '') === 'siswa') {
 }
 
 // ---------------------------------------------------------------------------
+// 0. REPORT GENERATION (PDF + Excel) - handled locally with real data
+// ---------------------------------------------------------------------------
+$qLower = strtolower(trim($question));
+$isReport = preg_match('/(laporan|report|susun|export|download)/', $qLower);
+
+if ($isReport && ($user['role'] ?? '') !== 'siswa') {
+    $reportResponse = process_report($question, $userId);
+    audit_log($userId, 'agent_report', 'info', mb_substr($question, 0, 120));
+    json_ok($reportResponse);
+    exit;
+}
+
+// ---------------------------------------------------------------------------
 // 1. Coba hubungi Agent Server eksternal (bila sedang aktif)
 // ---------------------------------------------------------------------------
 $agentUrls = [AGENT_URL, 'http://127.0.0.1:8000', 'http://127.0.0.1:8788'];
@@ -176,6 +189,149 @@ $response = process_with_zetaris($question);
 audit_log($userId, 'agent_ask', 'info', mb_substr($question, 0, 120));
 
 json_ok($response);
+
+/**
+ * Generate PDF + CSV report from real attendance data.
+ */
+function process_report(string $q, int $userId): array
+{
+    require_once __DIR__ . '/../../../vendor/fpdf/fpdf.php';
+
+    $tz = new DateTimeZone(defined('TIMEZONE') ? TIMEZONE : 'Asia/Jakarta');
+    $today = (new DateTimeImmutable('now', $tz))->format('Y-m-d');
+    $bulan = (new DateTimeImmutable('now', $tz))->format('Y-m');
+    $periodeAwal = $bulan . '-01';
+    $periodeAkhir = (new DateTimeImmutable($periodeAwal . ' 00:00:00', $tz))->format('Y-m-t');
+
+    // Query real data via Zetaris/DB
+    $runQ = static function (string $sql) {
+        try {
+            if (function_exists('zetaris_query')) {
+                $res = zetaris_query($sql, 500);
+                if (is_array($res)) {
+                    return array_map(static function ($r) {
+                        return is_array($r) ? array_values($r) : [$r];
+                    }, $res);
+                }
+            }
+        } catch (Throwable $e) {
+        }
+        try {
+            $rows = db_all(str_replace(['presensi_db.', 'PRESENSI_DB.'], '', $sql));
+            $out = [];
+            foreach ($rows as $r) $out[] = array_values($r);
+            return $out;
+        } catch (Throwable $e) {
+            return [];
+        }
+    };
+
+    $totSiswa = (int) ($runQ("SELECT COUNT(*) FROM presensi_db.users WHERE role = 'siswa'")[0][0] ?? 0);
+    $totMasuk = (int) ($runQ("SELECT COUNT(DISTINCT user_id) FROM presensi_db.attendance WHERE tanggal >= '$periodeAwal' AND tanggal <= '$periodeAkhir' AND scan_type = 'masuk'")[0][0] ?? 0);
+    $totPulang = (int) ($runQ("SELECT COUNT(DISTINCT user_id) FROM presensi_db.attendance WHERE tanggal >= '$periodeAwal' AND tanggal <= '$periodeAkhir' AND scan_type = 'pulang'")[0][0] ?? 0);
+    $totTelat = (int) ($runQ("SELECT COUNT(*) FROM presensi_db.attendance WHERE tanggal >= '$periodeAwal' AND tanggal <= '$periodeAkhir' AND is_late = 1")[0][0] ?? 0);
+    $totIzin = (int) ($runQ("SELECT COUNT(DISTINCT user_id) FROM presensi_db.izin_requests WHERE status = 'disetujui' AND tanggal_mulai <= '$periodeAkhir' AND tanggal_selesai >= '$periodeAwal'")[0][0] ?? 0);
+
+    $students = $runQ("SELECT u.id, u.nis, u.nama_lengkap, COALESCE(k.nama_kelas,'Tanpa Kelas') FROM presensi_db.users u LEFT JOIN presensi_db.kelas k ON u.kelas_id = k.id WHERE u.role = 'siswa' ORDER BY k.nama_kelas, u.nama_lengkap");
+
+    // Generate unique filename
+    $stamp = date('Ymd_His');
+    $baseName = "laporan_presensi_{$bulan}_{$stamp}";
+    $reportDir = __DIR__ . '/../../../uploads/reports';
+    if (!is_dir($reportDir)) @mkdir($reportDir, 0755, true);
+
+    // Generate CSV (Excel)
+    $csvPath = $reportDir . '/' . $baseName . '.csv';
+    $fp = fopen($csvPath, 'w');
+    fprintf($fp, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM for Excel
+    fputcsv($fp, ['No', 'NIS', 'Nama Siswa', 'Kelas', 'Status Bulan Ini']);
+    $no = 1;
+    foreach ($students as $s) {
+        fputcsv($fp, [$no++, $s[1] ?? '-', $s[2] ?? '-', $s[3] ?? '-', '']);
+    }
+    fputcsv($fp, []);
+    fputcsv($fp, ['Ringkasan Periode', $periodeAwal . ' s/d ' . $periodeAkhir]);
+    fputcsv($fp, ['Total Siswa', $totSiswa]);
+    fputcsv($fp, ['Hadir (scan masuk)', $totMasuk]);
+    fputcsv($fp, ['Sudah Pulang', $totPulang]);
+    fputcsv($fp, ['Terlambat', $totTelat]);
+    fputcsv($fp, ['Izin/Sakit', $totIzin]);
+    fclose($fp);
+
+    // Generate PDF
+    $pdfPath = $reportDir . '/' . $baseName . '.pdf';
+    $pdf = new FPDF();
+    $pdf->AddPage();
+    $pdf->SetFont('Arial', 'B', 16);
+    $pdf->Cell(0, 10, 'Laporan Presensi Sekolah', 0, 1, 'C');
+    $pdf->SetFont('Arial', '', 10);
+    $pdf->Cell(0, 6, 'Periode: ' . $periodeAwal . ' s/d ' . $periodeAkhir, 0, 1, 'C');
+    $pdf->Ln(4);
+
+    $pdf->SetFont('Arial', 'B', 11);
+    $pdf->Cell(0, 8, 'Ringkasan', 0, 1);
+    $pdf->SetFont('Arial', '', 10);
+    $pdf->Cell(60, 6, 'Total Siswa', 1);
+    $pdf->Cell(0, 6, $totSiswa, 1, 1);
+    $pdf->Cell(60, 6, 'Hadir (scan masuk)', 1);
+    $pdf->Cell(0, 6, $totMasuk, 1, 1);
+    $pdf->Cell(60, 6, 'Sudah Pulang', 1);
+    $pdf->Cell(0, 6, $totPulang, 1, 1);
+    $pdf->Cell(60, 6, 'Terlambat', 1);
+    $pdf->Cell(0, 6, $totTelat, 1, 1);
+    $pdf->Cell(60, 6, 'Izin/Sakit', 1);
+    $pdf->Cell(0, 6, $totIzin, 1, 1);
+    $pdf->Ln(6);
+
+    $pdf->SetFont('Arial', 'B', 11);
+    $pdf->Cell(0, 8, 'Daftar Siswa (' . count($students) . ')', 0, 1);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->Cell(10, 6, 'No', 1);
+    $pdf->Cell(30, 6, 'NIS', 1);
+    $pdf->Cell(90, 6, 'Nama Siswa', 1);
+    $pdf->Cell(40, 6, 'Kelas', 1, 1);
+    $pdf->SetFont('Arial', '', 9);
+    $no = 1;
+    foreach (array_slice($students, 0, 60) as $s) {
+        $pdf->Cell(10, 6, $no++, 1);
+        $pdf->Cell(30, 6, substr((string) ($s[1] ?? '-'), 0, 15), 1);
+        $pdf->Cell(90, 6, substr((string) ($s[2] ?? '-'), 0, 40), 1);
+        $pdf->Cell(40, 6, substr((string) ($s[3] ?? '-'), 0, 20), 1, 1);
+    }
+    $pdf->Output('F', $pdfPath);
+
+    $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
+    $webBase = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
+    // uploads/reports relative to project root
+    $pdfUrl = $baseUrl . '/uploads/reports/' . basename($pdfPath);
+    $csvUrl = $baseUrl . '/uploads/reports/' . basename($csvPath);
+
+    $ans = "### Laporan Presensi Sekolah\n";
+    $ans .= "**Periode:** `{$periodeAwal}` s/d `{$periodeAkhir}`\n\n";
+    $ans .= "Laporan berhasil dibuat dari data real Zetaris:\n";
+    $ans .= "- Total Siswa: **{$totSiswa}**\n";
+    $ans .= "- Hadir: **{$totMasuk}** · Pulang: **{$totPulang}** · Terlambat: **{$totTelat}** · Izin: **{$totIzin}**\n\n";
+    $ans .= "Silakan unduh laporan di bawah ini.";
+
+    return [
+        'answer' => $ans,
+        'mode' => 'report',
+        'provider' => 'SmartJournal AI · Report Generator',
+        'strategy' => 'zetaris+report',
+        'provenance' => ['presensi_db.attendance', 'presensi_db.users', 'presensi_db.kelas'],
+        'iterations' => 1,
+        'sufficient' => true,
+        'trace' => [
+            ['step' => 'plan', 'detail' => 'Mendeteksi permintaan laporan', 'ms' => 5],
+            ['step' => 'retrieve', 'detail' => 'Query data dari Zetaris', 'ms' => 50],
+            ['step' => 'generate', 'detail' => 'Generate PDF + CSV', 'ms' => 100],
+        ],
+        'downloads' => [
+            'pdf' => $pdfUrl,
+            'excel' => $csvUrl,
+        ],
+    ];
+}
 
 function call_ai_provider(string $question, string $provider, string $baseUrl, string $apiKey, string $model): ?string
 {

@@ -1087,6 +1087,18 @@ require __DIR__ . '/../templates/admin-head.php';
                     <span class="gm-ai-time">${provenancePills}</span>
                 </div>
                 <div class="gm-bubble-ai">${formattedHtml}</div>
+                ${data.downloads ? `
+                <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+                    ${data.downloads.pdf ? `<a href="${data.downloads.pdf}" target="_blank" class="btn btn--primary" style="padding:10px 20px;border-radius:10px;font-weight:600;font-size:13.5px;text-decoration:none;display:inline-flex;align-items:center;gap:8px">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Download PDF
+                    </a>` : ''}
+                    ${data.downloads.excel ? `<a href="${data.downloads.excel}" target="_blank" class="btn btn--soft" style="padding:10px 20px;border-radius:10px;font-weight:600;font-size:13.5px;text-decoration:none;display:inline-flex;align-items:center;gap:8px">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                        Download Excel (CSV)
+                    </a>` : ''}
+                </div>
+                ` : ''}
                 <div class="gm-action-bar">
                     <button type="button" class="gm-action-btn btn-like" title="Bagus">
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>

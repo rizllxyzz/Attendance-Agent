@@ -18,6 +18,7 @@ INTENTS = (
     "attendance_summary",
     "student_list",
     "izin_sakit",
+    "report",
     "sql_query",
     "help",
     "unknown",
@@ -31,6 +32,7 @@ _RULES = [
     (r"ringkas|rekap|statistik|kehadiran", "attendance_summary"),
     (r"siswa|murid|kelas", "student_list"),
     (r"izin|sakit|dispensasi", "izin_sakit"),
+    (r"laporan|report|susun|export|download", "report"),
     (r"status|hari ini|absen", "attendance_status_today"),
     (r"bantu|help|cara|apa", "help"),
 ]
@@ -57,6 +59,7 @@ def route(intent: str) -> str:
         "attendance_summary": "attendance_summary",
         "student_list": "student_list",
         "izin_sakit": "izin_report",
+        "report": "generate_report",
         "attendance_status_today": "status_today",
         "help": "help",
         "unknown": "fallback",
