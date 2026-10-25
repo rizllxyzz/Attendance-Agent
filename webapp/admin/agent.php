@@ -1186,6 +1186,7 @@ require __DIR__ . '/../templates/admin-head.php';
 
         fetch('/api/v1/agent/ask.php', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ question: text })
         })
@@ -1208,9 +1209,10 @@ require __DIR__ . '/../templates/admin-head.php';
         .catch(err => {
             const loadingElem = document.getElementById(loadingId);
             if (loadingElem) loadingElem.remove();
+            console.error('Agent fetch error:', err);
 
             appendAiMessage({
-                answer: '**Koneksi Terputus:** Tidak dapat menghubungi endpoint AI presensi.',
+                answer: '**Koneksi Terputus:** Tidak dapat menghubungi endpoint AI presensi. Cek console browser (F12).',
                 provider: 'System'
             }, text);
         })
