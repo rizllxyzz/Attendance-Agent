@@ -81,3 +81,8 @@ PY
 The full web app (admin panel + student portal) is included in webapp/.
 Run with Laragon/XAMPP: import webapp/database.sql, set webapp/.env, open http://localhost.
 
+
+## Full Stack (Docker Compose)
+Run everything (MySQL + PHP web + agent) in one command:
+\\\ash\ndocker compose up -d --build\n\\\\n- Web: http://localhost\n- Agent: http://localhost:8000\n- DB: localhost:3306\nZetaris & Nightshift run on host (host.docker.internal).
+

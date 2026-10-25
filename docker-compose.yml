@@ -1,0 +1,65 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-root}
+      MYSQL_DATABASE: ${DB_NAME:-presensi}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./webapp/database.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    image: php:8.2-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    volumes:
+      - ./webapp:/var/www/html
+    environment:
+      DB_DRIVER: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-presensi}
+      DB_USER: root
+      DB_PASS: ${DB_PASS:-root}
+      ZETARIS_REST_URL: ${ZETARIS_REST_URL:-http://host.docker.internal:8888/api/v1.0}
+      ZETARIS_ORG_ID: ${ZETARIS_ORG_ID:-1}
+      ZETARIS_API_KEY: ${ZETARIS_API_KEY:-}
+      MODEL_BASE_URL: ${MODEL_BASE_URL:-http://host.docker.internal:8088/v1}
+      MODEL_API_KEY: ${MODEL_API_KEY:-}
+      NEMOTRON_MODEL: ${NEMOTRON_MODEL:-meterless/auto}
+    command: >
+      bash -c "a2enmod rewrite && docker-php-ext-install mysqli pdo pdo_mysql && apache2-foreground"
+
+  agent:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      SAMPLE_MODE: ${SAMPLE_MODE:-false}
+      ZETARIS_REST_URL: ${ZETARIS_REST_URL:-http://host.docker.internal:8888/api/v1.0}
+      ZETARIS_ORG_ID: ${ZETARIS_ORG_ID:-1}
+      ZETARIS_API_KEY: ${ZETARIS_API_KEY:-}
+      MODEL_BASE_URL: ${MODEL_BASE_URL:-http://host.docker.internal:8088/v1}
+      MODEL_API_KEY: ${MODEL_API_KEY:-}
+      NEMOTRON_MODEL: ${NEMOTRON_MODEL:-meterless/auto}
+      DB_HOST: db
+      DB_NAME: ${DB_NAME:-presensi}
+      DB_USER: root
+      DB_PASS: ${DB_PASS:-root}
+
+volumes:
+  db_data:
