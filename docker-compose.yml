@@ -61,5 +61,17 @@ services:
       DB_USER: root
       DB_PASS: ${DB_PASS:-root}
 
+  # Evolution API (WhatsApp bot, opsional) - jalankan: docker compose --profile whatsapp up -d
+  evolution:
+    image: atendai/evolution-api:latest
+    profiles: ["whatsapp"]
+    environment:
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-hackathon-key}
+    ports:
+      - "8081:8080"
+    volumes:
+      - evolution_data:/evolution/store
+
 volumes:
   db_data:
+  evolution_data:
