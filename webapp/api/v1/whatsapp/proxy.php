@@ -64,8 +64,7 @@ switch ($action) {
         curl_setopt($ch, CURLOPT_URL, rtrim($evolutionUrl, '/') . '/instance/connect/' . $instance);
         break;
     case 'webhook':
-        $webhookUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
-            . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/api/v1/whatsapp/webhook.php';
+        $webhookUrl = wa_env('WHATSAPP_WEBHOOK_URL', 'http://web/api/v1/whatsapp/webhook.php');
         curl_setopt($ch, CURLOPT_URL, rtrim($evolutionUrl, '/') . '/webhook/set/' . $instance);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
@@ -73,7 +72,7 @@ switch ($action) {
                 'url' => $webhookUrl,
                 'enabled' => true,
                 'webhookByEvents' => true,
-                'events' => ['messages.upsert'],
+                'events' => ['MESSAGES_UPSERT'],
             ],
         ]));
         break;
