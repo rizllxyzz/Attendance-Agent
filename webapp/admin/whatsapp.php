@@ -221,7 +221,9 @@ require __DIR__ . '/../templates/admin-head.php';
     document.getElementById('btnStatus').addEventListener('click', async function() {
         setStatus('Memeriksa...', 'Menghubungi Evolution API', true);
         const res = await apiCall('status');
-        if (res && res.instance) {
+        if (res && res.error && res.error.includes('unreachable')) {
+            setStatus('Evolution API tidak jalan', 'Jalankan: docker compose up -d (atau docker compose --profile whatsapp up -d)', false);
+        } else if (res && res.instance) {
             const state = res.instance.state || res.state || 'unknown';
             setStatus('Status: ' + state, 'Instance: ' + instance, state === 'open');
         } else if (res && res.error) {
@@ -242,7 +244,12 @@ require __DIR__ . '/../templates/admin-head.php';
     });
 
     document.getElementById('btnQR').addEventListener('click', async function() {
-        const res = await apiCall('qr');
+        // Auto-create instance if not exists
+        let res = await apiCall('qr');
+        if (res && res.error && (res.error.includes('not found') || res.error.includes('does not exist'))) {
+            await apiCall('create');
+            res = await apiCall('qr');
+        }
         const qr = res?.qrcode?.base64 || res?.base64 || res?.code;
         if (qr) {
             const img = document.getElementById('qrImage');
@@ -250,7 +257,7 @@ require __DIR__ . '/../templates/admin-head.php';
             document.getElementById('qrArea').style.display = 'block';
             setStatus('QR Code siap', 'Scan dengan WhatsApp', true);
         } else {
-            setStatus('Gagal ambil QR', JSON.stringify(res).slice(0, 100), false);
+            setStatus('Gagal ambil QR', JSON.stringify(res).slice(0, 150), false);
         }
     });
 

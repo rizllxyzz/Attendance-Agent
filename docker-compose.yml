@@ -61,10 +61,9 @@ services:
       DB_USER: root
       DB_PASS: ${DB_PASS:-root}
 
-  # Evolution API (WhatsApp bot, opsional) - jalankan: docker compose --profile whatsapp up -d
+  # Evolution API (WhatsApp bot) - auto-start with stack
   evolution:
     image: atendai/evolution-api:latest
-    profiles: ["whatsapp"]
     environment:
       AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-hackathon-key}
       WEBHOOK_GLOBAL_ENABLED: "true"
