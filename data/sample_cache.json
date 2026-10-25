@@ -1,0 +1,12 @@
+{
+  "sample_attendance": [
+    {"user_id": 1, "tanggal": "2026-10-25", "scan_type": "masuk", "waktu": "2026-10-25 07:12:00", "is_late": 0, "late_minutes": 0},
+    {"user_id": 2, "tanggal": "2026-10-25", "scan_type": "masuk", "waktu": "2026-10-25 07:45:00", "is_late": 1, "late_minutes": 15},
+    {"user_id": 3, "tanggal": "2026-10-25", "scan_type": "masuk", "waktu": "2026-10-25 07:05:00", "is_late": 0, "late_minutes": 0}
+  ],
+  "sample_students": [
+    {"id": 1, "nama": "Andi", "kelas": "X IPA 1", "nis": "1001"},
+    {"id": 2, "nama": "Budi", "kelas": "X IPA 1", "nis": "1002"},
+    {"id": 3, "nama": "Citra", "kelas": "X IPA 2", "nis": "1003"}
+  ]
+}

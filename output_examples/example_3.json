@@ -1,0 +1,1 @@
+{"run_id": "sample", "mode": "sample", "intent": "sql_query", "handler": "run_sql", "answer": "[SAMPLE MODE] Intent=sql_query. Ditemukan 3 siswa sampel, 3 record absensi, 1 terlambat. Handler yang dipilih: run_sql.", "provider": "sample-mode"}

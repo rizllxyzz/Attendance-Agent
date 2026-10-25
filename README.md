@@ -1,93 +1,79 @@
-﻿# Open Agent Hackathon 2026 - Agent Scaffold
+﻿# Attendance Agent - Open Agent Hackathon 2026
 
-Agent project for Open Agent Hackathon 2026. Connects to **Zetaris** (Data layer) and **Meterless Nightshift** (Power layer).
+AI agent for school attendance (presensi) data, built on **Zetaris** as the data
+layer and **Meterless Nightshift** as the primary AI provider.
 
-## Structure
+## Features
+- Real `run_sql` calls to Zetaris Data Virtualization (no mocking).
+- Scout Intent Engine (Meterless) classifies query intent for routing.
+- FastAPI `/run` endpoint (programmatic access via curl).
+- `SAMPLE_MODE=true` runs on cached data without live credentials.
 
-```
-open-agent-hack/
-├── .env / .env.example
-├── requirements.txt
-├── smoke_test.py
-├── agent/
-│   ├── __init__.py
-│   ├── zetaris_client.py    # Zetaris REST client (real, no mock)
-│   ├── tools_zetaris.py     # Re-exports from zetaris_client
-│   ├── llm.py               # LLM client (Nightshift/Meterless)
-│   ├── main.py              # CLI agent runner
-│   ├── server.py            # FastAPI server for PHP frontend
-│   └── app.py               # Alternative minimal runner
-└── README.md
-```
-
-## Quick Start
-
-### 1. Install Dependencies
+## Setup
 ```bash
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS/Linux
+source .venv/bin/activate
+
 pip install -r requirements.txt
-# Optional (for server.py):
-pip install fastapi uvicorn
+cp .env.example .env   # fill in your Zetaris and Nightshift settings
 ```
 
-### 2. Configure .env
+### Zetaris
+1. Run Zetaris locally via Docker Desktop (see Participant Setup Guide).
+2. Create an API key in the Zetaris web UI (http://localhost:3000).
+3. Set `ZETARIS_REST_URL`, `ZETARIS_ORG_ID`, `ZETARIS_API_KEY` in `.env`.
+
+### Meterless Nightshift
+1. Install Nightshift desktop app.
+2. Add NVIDIA API key in Nightshift Providers tab.
+3. Copy Runtime URL + token from Nightshift Console.
+4. Set `MODEL_BASE_URL`, `MODEL_API_KEY`, `NEMOTRON_MODEL` in `.env`.
+
+## Run
 ```bash
-copy .env.example .env
-# Edit .env with your credentials
+# Live mode
+python run.py
+
+# Sample mode (no credentials needed)
+SAMPLE_MODE=true python run.py
 ```
 
-### 3. Test Connections
+Server listens on http://0.0.0.0:8000.
+
+## Drive it (programmatic)
 ```bash
-python smoke_test.py
+curl -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d @input_examples/example_1.json
 ```
 
-### 4. Run Agent (CLI)
+## Docker
 ```bash
-python -m agent.main
-# or with a question:
-python -m agent.main "Siapa yang belum absen pulang hari ini?"
+docker build -t oah-submission .
+docker run --rm -p 8000:8000 --env-file .env oah-submission
+# Sample mode (no credentials):
+docker run --rm -p 8000:8000 -e SAMPLE_MODE=true oah-submission
 ```
 
-### 5. Run Agent (Server for PHP frontend)
+## Tests (Meterless Engine)
 ```bash
-python -m agent.server
-# Server runs on http://localhost:8000
-# PHP frontend calls POST /ask with {"question": "..."}
+pytest tests/ -q
 ```
 
-## Environment Variables
+## Sponsor technology
+- **Zetaris**: data layer via REST `run_sql` (see `app/adapters/zetaris.py`).
+- **Meterless Nightshift**: primary AI provider (OpenAI-compatible), see `app/adapters/nightshift.py`.
+- **Meterless Engine**: Scout Intent (`app/engines/scout_intent.py`) classifies query intent for routing.
+- **NVIDIA**: Nemotron models routed through Nightshift.
 
-| Variable | Description | Example |
-|---|---|---|
-| `ZETARIS_REST_URL` | Zetaris REST API endpoint | `http://localhost:8888/api/v1.0` |
-| `ZETARIS_ORG_ID` | Organization ID (usually 1) | `1` |
-| `ZETARIS_API_KEY` | Zetaris API key (from web UI) | `your-key` |
-| `ZETARIS_BASE_URL` | Zetaris web UI URL (for smoke test) | `http://localhost:3000` |
-| `MODEL_BASE_URL` | Nightshift/Meterless base URL | `http://127.0.0.1:8088/v1` |
-| `MODEL_API_KEY` | Nightshift runtime token | `your-token` |
-| `NEMOTRON_MODEL` | Model name | `meterless/auto` |
-| `AGENT_PORT` | Server port (optional) | `8000` |
+## Traces
+Each `/run` writes JSONL traces to `logs/run.jsonl` and stdout.
 
-## Architecture
-
-```
-PHP Frontend (Laragon)
-    ↓ POST /api/v1/agent/ask.php
-Python Agent (server.py:8000)
-    ↓ run_sql() → Zetaris REST API
-    ↓ chat.completions → Nightshift (Meterless)
-    ↓
-Zetaris (Data layer) + Nightshift/Nemotron (Power layer)
-```
-
-## Hackathon Compliance
-
-- **Data**: Zetaris REST API (`run_sql`) - real calls, no mock
-- **Build**: Meterless H-MEM engine (in Node.js agent) + Cursor
-- **Power**: Meterless Nightshift as primary AI provider + Nemotron
-
-## Notes
-
-- Never commit `.env` (listed in `.gitignore`)
-- `smoke_test.py` verifies all connections before running agent
-- `server.py` provides REST API for PHP frontend integration
-- All Zetaris calls are real - no mock or fake data
+## Limitations
+- Sample mode uses cached data (`data/sample_cache.json`), not live queries.
+- Live mode requires Zetaris + Nightshift running locally.
+- Scout Intent is rule-based (no LLM), kept lightweight for fast runs.
+PY

@@ -1,0 +1,1 @@
+"""Open Agent Hackathon 2026 - Attendance Agent application package."""

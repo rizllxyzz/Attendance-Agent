@@ -1,0 +1,1 @@
+{"run_id": "sample", "mode": "sample", "intent": "greeting", "handler": "greet", "answer": "[SAMPLE MODE] Intent=greeting. Ditemukan 3 siswa sampel, 3 record absensi, 1 terlambat. Handler yang dipilih: greet.", "provider": "sample-mode"}

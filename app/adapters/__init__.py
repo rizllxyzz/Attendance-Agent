@@ -1,0 +1,1 @@
+"""Adapters for sponsor technologies (Zetaris, Meterless Nightshift)."""
