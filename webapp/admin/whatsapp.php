@@ -199,16 +199,12 @@ require __DIR__ . '/../templates/admin-head.php';
 
 <script>
 (function() {
-    const evolutionUrl = <?= json_encode($evolutionUrl) ?>;
-    const evolutionKey = <?= json_encode($evolutionKey) ?>;
+    const proxyBase = '/api/v1/whatsapp/proxy.php';
     const instance = <?= json_encode($evolutionInstance) ?>;
 
-    function apiCall(path, method, body) {
-        return fetch(evolutionUrl + path, {
-            method: method || 'GET',
-            headers: { 'Content-Type': 'application/json', 'apikey': evolutionKey },
-            body: body ? JSON.stringify(body) : undefined
-        }).then(r => r.json()).catch(e => ({ error: e.message }));
+    function apiCall(action) {
+        return fetch(proxyBase + '?action=' + action + '&instance=' + encodeURIComponent(instance))
+            .then(r => r.json()).catch(e => ({ error: e.message }));
     }
 
     function setStatus(title, text, ok) {
@@ -224,7 +220,7 @@ require __DIR__ . '/../templates/admin-head.php';
 
     document.getElementById('btnStatus').addEventListener('click', async function() {
         setStatus('Memeriksa...', 'Menghubungi Evolution API', true);
-        const res = await apiCall('/instance/connectionState/' + instance);
+        const res = await apiCall('status');
         if (res && res.instance) {
             const state = res.instance.state || res.state || 'unknown';
             setStatus('Status: ' + state, 'Instance: ' + instance, state === 'open');
@@ -237,11 +233,7 @@ require __DIR__ . '/../templates/admin-head.php';
 
     document.getElementById('btnCreate').addEventListener('click', async function() {
         setStatus('Membuat instance...', instance, true);
-        const res = await apiCall('/instance/create', 'POST', {
-            instanceName: instance,
-            qrcode: true,
-            integration: 'WHATSAPP-BAILEYS'
-        });
+        const res = await apiCall('create');
         if (res && (res.instance || res.hash)) {
             setStatus('Instance dibuat', 'Klik "Tampilkan QR Code" untuk scan', true);
         } else {
@@ -250,7 +242,7 @@ require __DIR__ . '/../templates/admin-head.php';
     });
 
     document.getElementById('btnQR').addEventListener('click', async function() {
-        const res = await apiCall('/instance/connect/' + instance);
+        const res = await apiCall('qr');
         const qr = res?.qrcode?.base64 || res?.base64 || res?.code;
         if (qr) {
             const img = document.getElementById('qrImage');
@@ -263,17 +255,9 @@ require __DIR__ . '/../templates/admin-head.php';
     });
 
     document.getElementById('btnWebhook').addEventListener('click', async function() {
-        const webhookUrl = window.location.origin + '/api/v1/whatsapp/webhook.php';
-        const res = await apiCall('/webhook/set/' + instance, 'POST', {
-            webhook: {
-                url: webhookUrl,
-                enabled: true,
-                webhookByEvents: true,
-                events: ['messages.upsert']
-            }
-        });
+        const res = await apiCall('webhook');
         if (res && !res.error) {
-            setStatus('Webhook diset', webhookUrl, true);
+            setStatus('Webhook diset', 'OK', true);
         } else {
             setStatus('Gagal set webhook', JSON.stringify(res).slice(0, 100), false);
         }
