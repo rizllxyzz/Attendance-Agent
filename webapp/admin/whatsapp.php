@@ -187,7 +187,7 @@ require __DIR__ . '/../templates/admin-head.php';
             <li>Buka <strong>http://localhost:8081/manager</strong> (atau 8082)</li>
             <li>Klik <strong>Create Instance</strong> → nama: <code>presensi</code></li>
             <li>Klik <strong>Tampilkan QR Code</strong> di atas → scan dengan WhatsApp</li>
-            <li>Set Webhook di Evolution: URL = <code>http://host.docker.internal/api/v1/whatsapp/webhook.php</code>, Header <code>X-WhatsApp-Webhook-Token</code> = token di atas</li>
+            <li>Set Webhook di Evolution: URL = <code>http://web/api/v1/whatsapp/webhook.php</code> (jika di Docker) atau <code>http://host.docker.internal/api/v1/whatsapp/webhook.php</code> (jika Evolution di Docker, web di host), Header <code>X-WhatsApp-Webhook-Token</code> = token di atas</li>
             <li>Subscribe event <code>messages.upsert</code></li>
             <li>Test: kirim "Apakah Andi sudah pulang?" dari WhatsApp lain → bot balas otomatis</li>
         </ol>
