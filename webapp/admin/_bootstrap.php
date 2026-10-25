@@ -247,7 +247,7 @@ $menu = [
     ['kunci' => 'backup', 'href' => '/admin/backup.php', 'label' => t('nav.backup'), 'icon' => 'fa-database', 'mobile' => false, 'butuh' => ['admin']],
     ['kunci' => 'reports', 'href' => '/admin/reports.php', 'label' => 'Laporan Ekspor', 'icon' => 'fa-file-export', 'mobile' => false, 'butuh' => ['admin']],
     ['kunci' => 'ai-provider', 'href' => '/admin/ai-provider.php', 'label' => 'Koneksi AI', 'icon' => 'fa-plug', 'mobile' => false, 'butuh' => ['admin']],
-];
+    ['kunci' => 'whatsapp', 'href' => '/admin/whatsapp.php', 'label' => 'WhatsApp Bot', 'icon' => 'fa-whatsapp', 'mobile' => false, 'butuh' => ['admin']],];
 
 $menu = array_values(array_filter($menu, static function ($m) use ($adminRole) {
     if ($m['butuh'] !== [] && !in_array($adminRole, $m['butuh'], true)) {

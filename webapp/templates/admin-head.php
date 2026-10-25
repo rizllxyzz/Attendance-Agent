@@ -96,7 +96,7 @@ $tabMobile = array_values(array_filter($menu, static function ($m) {
                 $kelompok = [
                     'group.utama'   => ['beranda', 'absensi', 'izin', 'laporan'],
                     'group.kelola'  => ['siswa', 'akun', 'kelas', 'impor', 'wajah'],
-                    'group.lainnya' => ['agent', 'reports', 'ai-provider', 'pengaturan', 'backup'],
+                    'group.lainnya' => ['agent', 'reports', 'ai-provider', 'whatsapp', 'pengaturan', 'backup'],
                 ];
                 $petaMenu = [];
                 foreach ($menu as $m) {
