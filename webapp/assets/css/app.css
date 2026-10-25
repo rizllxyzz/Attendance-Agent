@@ -1,0 +1,675 @@
+/* ==================================================================
+ |  app.css — Kerangka bersama aplikasi
+ |  Tema: Clean White + Crimson Red — Elite School Premium
+ | ================================================================== */
+
+/* Font Inter disimpan lokal (variable font) supaya halaman login tidak
+ * menarik apa pun dari internet. */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/assets/fonts/inter/inter-var.woff2') format('woff2');
+}
+
+/* ================================================================
+   1. DESIGN TOKENS
+   ================================================================ */
+:root {
+    /* Core Palette */
+    --bg:            #faf8f6;
+    --surface:       #ffffff;
+    --surface-warm:  #fdf5f4;
+
+    /* Borders */
+    --border:        rgba(0,0,0,0.08);
+    --border-input:  #e0d6d3;
+    --border-focus:  #a3241a;
+
+    /* Red Spectrum. Nilai Token ini disamakan dengan --brand di
+     * siswa.css (--brand: #a3241a) supaya login dan portal memakai
+     * merah yang sama persis. Kalau keduanya berbeda, halaman login
+     * terlihat seperti produk yang berbeda dari portalnya. */
+    --red-900:       #5e120c;
+    --red-800:       #7b1a14;
+    --red-700:       #8a1d15;
+    --red:           #a3241a;
+    --red-500:       #b83a2c;
+    --red-400:       #c8564a;
+    --red-pale:      #fdf1ef;
+    --red-tint:      rgba(163, 36, 26, 0.1);
+    --red-glow:      rgba(163, 36, 26, 0.30);
+
+    /* Gold */
+    --gold:          #c9a227;
+    --gold-light:    #f0d060;
+
+    /* Text */
+    --text-900:      #0f0f0f;
+    --text-700:      #2d2d2d;
+    --text-500:      #5a5a5a;
+    --text-300:      #9a9a9a;
+    --text-white:    #ffffff;
+
+    /* Semantic */
+    --ok:            #166534;
+    --ok-bg:         #f0fdf4;
+    --gagal:         var(--red);
+    --gagal-bg:      var(--red-pale);
+
+    /* Spacing / Shape */
+    --r-xs:          4px;
+    --r-sm:          8px;
+    --r:             12px;
+    --r-lg:          18px;
+    --r-xl:          24px;
+    --r-pill:        999px;
+
+    /* Shadows */
+    --shadow-xs:     0 1px 2px rgba(0,0,0,0.06);
+    --shadow-sm:     0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md:     0 6px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.05);
+    --shadow-lg:     0 16px 48px rgba(0,0,0,0.13), 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-red:    0 4px 16px var(--red-glow);
+    --shadow-red-lg: 0 8px 28px rgba(163, 36, 26, 0.42);
+
+    /* Legacy compat */
+    --accent:  var(--red);
+    --panel:   #ffffff;
+    --panel-2: #fdf5f4;
+    --teks:    #0f0f0f;
+    --teks-redup: #5a5a5a;
+    --teks-muted: #9a9a9a;
+    --ok-color: #22c55e;
+    --gagal-color: var(--red);
+    --kuning: #d97706;
+}
+
+/* ================================================================
+   2. RESET & BASE
+   ================================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    background: var(--bg);
+    color: var(--text-700);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================================================================
+   3. AUTH LAYOUT — Two column split
+   ================================================================ */
+
+.auth-body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: stretch;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+}
+
+/* ── LEFT PANEL (decorative, brand side) ── */
+.auth-left {
+    display: none; /* hidden on mobile */
+    position: relative;
+    flex: 0 0 48%;
+    background: linear-gradient(150deg, var(--red-900) 0%, var(--red) 55%, var(--red-400) 100%);
+    overflow: hidden;
+}
+
+@media (min-width: 900px) {
+    .auth-left { display: flex; flex-direction: column; }
+}
+
+/* Pattern overlay */
+.auth-left::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 25% 35%, rgba(255,255,255,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(0,0,0,0.15) 0%, transparent 50%),
+        repeating-linear-gradient(
+            -55deg,
+            rgba(255,255,255,0.03) 0px,
+            rgba(255,255,255,0.03) 1px,
+            transparent 1px,
+            transparent 20px
+        );
+    pointer-events: none;
+}
+
+/* Floating circles decoration */
+.auth-left::after {
+    content: '';
+    position: absolute;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    border: 60px solid rgba(255,255,255,0.06);
+    bottom: -80px; right: -80px;
+    pointer-events: none;
+}
+
+.auth-left-inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 3rem 3.5rem;
+    height: 100%;
+    color: white;
+}
+
+/* Top logo in left panel */
+.auth-left-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.auth-left-logo-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: var(--r);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+}
+
+.auth-left-logo-icon svg { color: white; }
+
+.auth-left-logo-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.95);
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+}
+
+.auth-left-logo-sub {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 1px;
+}
+
+/* Center hero text */
+.auth-left-hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+/* Big decorative circle */
+.auth-left-circle {
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.auth-left-circle::before {
+    content: '';
+    position: absolute;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.auth-left-circle svg {
+    color: rgba(255,255,255,0.85);
+}
+
+.auth-left-hero h2 {
+    font-size: 2.25rem;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.auth-left-hero h2 em {
+    font-style: normal;
+    color: var(--gold-light);
+}
+
+.auth-left-hero p {
+    font-size: 0.9375rem;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.65;
+    max-width: 320px;
+}
+
+/* Feature pills */
+.auth-left-features {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 2rem;
+}
+
+.auth-feat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+}
+
+.auth-feat-dot {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+.auth-feat-dot svg { color: var(--gold-light); }
+
+/* Bottom tagline */
+.auth-left-foot {
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.03em;
+}
+
+/* ── RIGHT PANEL (form side) ── */
+.auth-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    padding-top: max(2rem, env(safe-area-inset-top));
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+
+/* ── Card ── */
+.auth-card {
+    width: 100%;
+    max-width: 24rem;
+    animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Mobile brand (only on small screens) ── */
+.auth-mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 900px) {
+    .auth-mobile-brand { display: none; }
+}
+
+.auth-mobile-icon {
+    width: 46px; height: 46px;
+    border-radius: var(--r);
+    background: linear-gradient(145deg, var(--red-500) 0%, var(--red-900) 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    box-shadow: var(--shadow-red);
+    flex-shrink: 0;
+}
+
+.auth-mobile-name {
+    font-size: 0.925rem;
+    font-weight: 700;
+    color: var(--text-900);
+    line-height: 1.3;
+}
+
+.auth-mobile-sub {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+}
+
+/* ── Form headline ── */
+.auth-headline {
+    margin-bottom: 1.75rem;
+}
+
+.auth-headline-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: var(--red-tint);
+    border: 1px solid rgba(163, 36, 26, 0.18);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    margin-bottom: 0.875rem;
+}
+
+.auth-headline-label::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+    display: block;
+    animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.85); }
+}
+
+.auth-headline h2 {
+    font-size: 1.875rem;
+    font-weight: 900;
+    color: var(--text-900);
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+    margin-bottom: 0.4rem;
+}
+
+.auth-headline p {
+    font-size: 0.875rem;
+    color: var(--text-500);
+    line-height: 1.6;
+}
+
+/* ── Form ── */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.125rem;
+}
+
+/* ── Fields ── */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4375rem;
+}
+
+.field-label {
+    font-size: 0.775rem;
+    font-weight: 700;
+    color: var(--text-700);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.field-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.field-icon {
+    position: absolute;
+    left: 0.9rem;
+    color: var(--text-300);
+    pointer-events: none;
+    transition: color 0.2s;
+}
+
+.field input[type="text"],
+.field input[type="password"] {
+    width: 100%;
+    padding: 0.8125rem 2.875rem 0.8125rem 2.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--text-900);
+    background: var(--surface);
+    border: 1.5px solid var(--border-input);
+    border-radius: var(--r-sm);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    -webkit-appearance: none;
+}
+
+.field input::placeholder {
+    color: var(--text-300);
+    font-weight: 400;
+}
+
+.field input:hover:not(:focus) {
+    border-color: #c9b8b4;
+}
+
+.field input:focus {
+    border-color: var(--red);
+    background: var(--surface);
+    box-shadow: 0 0 0 3.5px rgba(163, 36, 26, 0.12);
+}
+
+.field-input-wrap:focus-within .field-icon {
+    color: var(--red);
+}
+
+/* Show/hide password toggle */
+.field-toggle-pw {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    padding: 0.3rem;
+    cursor: pointer;
+    color: var(--text-300);
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--r-xs);
+    transition: color 0.2s;
+    touch-action: manipulation;
+    line-height: 1;
+}
+
+.field-toggle-pw:hover { color: var(--red); }
+
+/* ── Submit button ── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    border: none;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shimmer effect */
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+.btn:hover:not([disabled])::after { left: 140%; }
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--red-500) 0%, var(--red) 40%, var(--red-800) 100%);
+    color: white;
+    box-shadow: var(--shadow-red), inset 0 1px 0 rgba(255,255,255,0.12);
+    margin-top: 0.5rem;
+}
+
+.btn-primary:hover:not([disabled]) {
+    box-shadow: var(--shadow-red-lg), inset 0 1px 0 rgba(255,255,255,0.12);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active:not([disabled]) {
+    transform: translateY(1px);
+    box-shadow: var(--shadow-red);
+}
+
+.btn-block { width: 100%; }
+
+.btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+.btn:focus-visible {
+    outline: 2.5px solid var(--red);
+    outline-offset: 2px;
+}
+
+/* Spinner */
+.btn-spinner svg { animation: spin 0.75s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Divider ── */
+.auth-or {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.25rem 0;
+}
+
+.auth-or::before, .auth-or::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.auth-or span {
+    font-size: 0.75rem;
+    color: var(--text-300);
+    font-weight: 500;
+}
+
+/* ── Alerts ── */
+.alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.875rem 1rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5;
+    border-radius: var(--r-sm);
+    border: 1.5px solid;
+}
+
+.alert svg { flex-shrink: 0; margin-top: 1px; }
+
+.alert-error {
+    color: var(--red-800);
+    background: var(--red-pale);
+    border-color: rgba(163, 36, 26, 0.25);
+}
+
+.alert-ok {
+    color: var(--ok);
+    background: var(--ok-bg);
+    border-color: rgba(22, 101, 52, 0.25);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%  { transform: translateX(-5px); }
+    30%  { transform: translateX(5px); }
+    50%  { transform: translateX(-4px); }
+    70%  { transform: translateX(3px); }
+    90%  { transform: translateX(-2px); }
+}
+
+.shake { animation: shake 0.4s ease both; }
+
+/* ── Footer note ── */
+.auth-foot {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.775rem;
+    color: var(--text-300);
+    line-height: 1.6;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+/* ================================================================
+   4. LINKS & A11Y
+   ================================================================ */
+a { color: var(--red); text-decoration: none; transition: color 0.15s; }
+a:hover { color: var(--red-800); }
+a:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; border-radius: 2px; }
+
+/* ================================================================
+   5. REDUCED MOTION
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ================================================================
+   6. LINTAS-UI: SUDUT MEMBULAT DASAR
+   Jaring pengaman — semua kendali & permukaan kotak dapat sudut
+   membulat minimal supaya tidak ada lagi sudut tajam. Dipakai
+   :where() (spesifisitas nol) sehingga aturan komponen yang sudah
+   menetapkan radius sendiri (pil 999px, avatar 50%, dsb.) selalu
+   menang; ini tidak menimpa apa pun, hanya mengisi yang kosong.
+   ================================================================ */
+:where(
+    button, .btn, [class*="btn"],
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+    select, textarea,
+    img, video, table, pre, code, kbd, blockquote, figure,
+    [class*="card"], [class*="panel"], [class*="chip"], [class*="tag"],
+    [class*="badge"], [class*="pill"], [class*="thumb"], [class*="tile"],
+    [class*="box"], [class*="alert"], [class*="toast"], [class*="note"],
+    [class*="avatar"], [class*="banner"], [class*="hero"], [class*="stat"],
+    [class*="kpi"], [class*="item"], [class*="list"], [class*="cover"],
+    [class*="seg"], [class*="switch"], [class*="input"], [class*="field"],
+    [class*="table"], [class*="row"]
+) {
+    border-radius: var(--r-sm, 10px);
+}

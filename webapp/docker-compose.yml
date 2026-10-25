@@ -1,0 +1,28 @@
+services:
+  presensi-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: presensi-web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:80"
+    environment:
+      DB_DRIVER: pgsql
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: presensi
+      DB_USER: presensi_app
+      DB_PASS: ${PRESENSI_DB_PASSWORD}
+      API_FINGERPRINT_KEY: ${API_FINGERPRINT_KEY}
+      ZETARIS_API_URL: http://api:8888
+      ZETARIS_ORG_ID: "1"
+      ZETARIS_API_TOKEN: ${ZETARIS_API_TOKEN}
+      AGENT_SHARED_TOKEN: ${AGENT_SHARED_TOKEN}
+    networks:
+      - zetaris_default
+
+networks:
+  zetaris_default:
+    external: true
+    name: zetaris_default

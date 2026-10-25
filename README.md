@@ -77,3 +77,7 @@ Each `/run` writes JSONL traces to `logs/run.jsonl` and stdout.
 - Live mode requires Zetaris + Nightshift running locally.
 - Scout Intent is rule-based (no LLM), kept lightweight for fast runs.
 PY
+## Web Frontend (PHP)
+The full web app (admin panel + student portal) is included in webapp/.
+Run with Laragon/XAMPP: import webapp/database.sql, set webapp/.env, open http://localhost.
+

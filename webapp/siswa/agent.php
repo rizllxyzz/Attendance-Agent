@@ -1,0 +1,25 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/_bootstrap.php';
+$pageKey = 'agent';
+$pageTitle = 'Asisten Presensi';
+$pageSub = 'Bantuan cepat untuk status dan riwayat presensi Anda';
+require __DIR__ . '/../templates/siswa-head.php';
+?>
+<style>
+.student-agent{max-width:900px;margin:0 auto;display:grid;gap:16px}
+.student-agent__hero{padding:24px;border-radius:24px;background:linear-gradient(135deg,#fff 0%,#eef4ff 100%);border:1px solid var(--line);box-shadow:var(--sh-1)}
+.student-agent__hero h2{font-size:clamp(22px,4vw,32px);margin:0 0 6px}.student-agent__hero p{color:var(--text-2);margin:0}
+.student-agent__chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.student-agent__chip{padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:12px;cursor:pointer;transition:.2s}.student-agent__chip:hover{transform:translateY(-2px);border-color:#93c5fd}
+.student-agent__messages{min-height:320px;display:flex;flex-direction:column;gap:12px}.student-agent__msg{max-width:88%;padding:14px 16px;border-radius:18px;line-height:1.6;white-space:pre-wrap;animation:studentAgentIn .22s ease}.student-agent__msg--ai{background:#fff;border:1px solid var(--line);align-self:flex-start}.student-agent__msg--ai strong{font-weight:700;color:var(--text)}.student-agent__msg--user{background:#1d4ed8;color:#fff;align-self:flex-end;border-bottom-right-radius:5px}.student-agent__composer{position:sticky;bottom:90px;display:flex;gap:8px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh-3)}.student-agent__input{min-width:0;flex:1;border:0;resize:none;padding:10px;font:inherit;font-size:16px;outline:0}.student-agent__send{border:0;border-radius:13px;background:#1d4ed8;color:#fff;padding:0 18px;font-weight:700;cursor:pointer}.student-agent__send:disabled{opacity:.45}@keyframes studentAgentIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(max-width:600px){.student-agent__hero{padding:18px}.student-agent__msg{max-width:94%}.student-agent__composer{bottom:82px}.student-agent__send{padding:0 14px}}
+</style>
+<div class="student-agent">
+ <section class="student-agent__hero"><h2>Asisten Presensi</h2><p>Data yang ditampilkan hanya data presensi akun Anda.</p><div class="student-agent__chips"><button class="student-agent__chip" data-q="Bagaimana status absen saya hari ini?">Status hari ini</button><button class="student-agent__chip" data-q="Tampilkan riwayat presensi saya">Riwayat saya</button><button class="student-agent__chip" data-q="Bagaimana cara absen?">Cara absen</button><button class="student-agent__chip" data-q="Tampilkan izin dan sakit saya">Izin & sakit</button></div></section>
+ <section class="student-agent__messages" id="studentAgentMessages" aria-live="polite"><div class="student-agent__msg student-agent__msg--ai">Halo! Tanyakan status absen hari ini atau riwayat presensi Anda.</div></section>
+ <form class="student-agent__composer" id="studentAgentForm"><textarea class="student-agent__input" id="studentAgentInput" rows="1" maxlength="500" placeholder="Tanyakan tentang presensi Anda..."></textarea><button class="student-agent__send" id="studentAgentSend" type="submit">Kirim</button></form>
+</div>
+<script>
+(function(){const f=document.getElementById('studentAgentForm'),i=document.getElementById('studentAgentInput'),b=document.getElementById('studentAgentSend'),m=document.getElementById('studentAgentMessages');function add(t,c){const e=document.createElement('div');e.className='student-agent__msg student-agent__msg--'+c;e.textContent=t;m.appendChild(e);e.scrollIntoView({behavior:'smooth',block:'nearest'});return e}function render(t){const e=document.createElement('div');e.innerHTML=String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');return e.innerHTML}async function ask(q){if(!q||b.disabled)return;b.disabled=true;add(q,'user');const load=add('Sedang membaca data presensi dan pengajuan Anda...','ai');try{const r=await fetch('/api/v1/agent/ask.php',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({question:q})});const j=await r.json();load.innerHTML=render((j.data&&j.data.answer)||j.message||'Tidak ada jawaban.')}catch(e){load.textContent='Koneksi gagal. Silakan coba lagi.'}finally{b.disabled=false;i.value='';i.focus()}}f.addEventListener('submit',e=>{e.preventDefault();ask(i.value.trim())});document.querySelectorAll('[data-q]').forEach(x=>x.addEventListener('click',()=>ask(x.dataset.q)));i.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();f.requestSubmit()}})})();
+</script>
+<?php require __DIR__ . '/../templates/siswa-foot.php'; ?>

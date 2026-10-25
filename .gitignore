@@ -3,3 +3,13 @@ __pycache__
 *.pyc
 .venv
 
+
+# Webapp (PHP frontend)
+webapp/.env
+webapp/**/*.sqlite
+webapp/**/*.sqlite-journal
+webapp/uploads/*
+!webapp/uploads/README.md
+!webapp/uploads/.htaccess
+webapp/scratch/
+

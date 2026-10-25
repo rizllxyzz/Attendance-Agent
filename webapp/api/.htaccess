@@ -1,0 +1,36 @@
+# ==========================================================
+#  api/.htaccess - Aturan Akses Endpoint REST API v1
+#  Hanya file .php dalam api/v1/ yang boleh dipanggil.
+# ==========================================================
+
+Options -Indexes
+
+# Tambahkan header JSON default
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always unset X-Powered-By
+</IfModule>
+
+# Tolak file non-.php (JSON mentah, .md, dll.)
+<FilesMatch "\.(?!php$)[a-zA-Z0-9]+$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Akses endpoint secara opsional tanpa suffix .php
+    # Contoh: /api/v1/auth/login  ->  /api/v1/auth/login.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} !/api/v1/.+\.php
+    RewriteRule ^v1/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/?$ v1/$1/$2.php [L,QSA]
+
+    # Root /api tidak boleh diakses langsung -> arahkan ke login
+    RewriteRule ^$ v1/auth/login.php [L]
+</IfModule>
+
+# Cegah request method yang tidak relevan untuk endpoint yang.READ-only
+<LimitExcept GET POST OPTIONS>
+    Require all denied
+</LimitExcept>

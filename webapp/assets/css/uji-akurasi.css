@@ -1,0 +1,275 @@
+/* ==================================================================
+ |  Gaya khusus halaman uji akurasi.
+ |
+ |  Terpisah dari camera-scan.css supaya halaman scan siswa tidak
+ |  ikut membawa aturan yang tidak dipakai. Keduanya memakai kelas
+ |  dasar yang sama dari camera-scan.css.
+ * ================================================================== */
+
+/* ------------------------------------------------------------------
+ |  Kartu uji
+ * ------------------------------------------------------------------ */
+
+.kartu {
+    background: var(--panel);
+    border: 1px solid var(--panel-2);
+    border-radius: var(--r, 12px);
+    padding: 0.875rem;
+}
+
+.kartu__judul {
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.kartu__nomor {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8125rem;
+    flex: none;
+}
+
+.kartu__keterangan {
+    font-size: 0.8125rem;
+    color: var(--teks-redup);
+    margin-top: 0.25rem;
+}
+
+.kartu__isi {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+/* ------------------------------------------------------------------
+ |  Meter jarak
+ |
+ |  Ini inti halaman: menunjukkan di mana jarak wajah sekarang berada
+ |  relatif terhadap ambang yang dipakai server. Far tak yang bergerak
+ |  lebih mudah dibaca daripada angka yang berdiri sendiri.
+ * ------------------------------------------------------------------ */
+
+.meter {
+    position: relative;
+    height: 2rem;
+    background: var(--panel-2);
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.meter__zona {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    /* Zona 0..ambang = diterima, dibiarkan terang. */
+    background: rgba(34, 197, 94, 0.3);
+}
+
+.meter__zona--tolak {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.meter__ambang {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--kuning);
+}
+
+.meter__ambang::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 1px;
+    left: 3px;
+    font-size: 0.625rem;
+    color: var(--kuning);
+    white-space: nowrap;
+}
+
+.meter__jarak {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+    transition: left 0.2s ease;
+}
+
+.meter__sumbu {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.625rem;
+    color: var(--teks-redup);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------
+ |  Angka kunci
+ * ------------------------------------------------------------------ */
+
+.angka {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.angka__kotak {
+    background: var(--panel-2);
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.75rem;
+}
+
+.angka__label {
+    font-size: 0.6875rem;
+    color: var(--teks-redup);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.angka__nilai {
+    font-size: 1.375rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.angka__nilai--ok    { color: var(--ok); }
+.angka__nilai--gagal { color: var(--gagal); }
+.angka__nilai--kuning{ color: var(--kuning); }
+
+.angka__satuan {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--teks-redup);
+}
+
+/* ------------------------------------------------------------------
+ |  Tabel hasil
+ * ------------------------------------------------------------------ */
+
+.tabel {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.tabel th,
+.tabel td {
+    padding: 0.375rem 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--panel-2);
+}
+
+.tabel th {
+    color: var(--teks-redup);
+    font-weight: 500;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.tabel td.angka-kolom,
+.tabel th.angka-kolom {
+    text-align: right;
+}
+
+.tabel__bungkus {
+    max-height: 16rem;
+    overflow-y: auto;
+    border: 1px solid var(--panel-2);
+    border-radius: 0.5rem;
+}
+
+/* ------------------------------------------------------------------
+ |  Status keputusan
+ * ------------------------------------------------------------------ */
+
+.putusan {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--panel-2);
+    background: var(--panel-2);
+}
+
+.putusan[data-ton="ok"]    { border-color: var(--ok);    background: rgba(34, 197, 94, 0.1); }
+.putusan[data-ton="gagal"] { border-color: var(--gagal); background: rgba(239, 68, 68, 0.1); }
+.putusan[data-ton="kuning"]{ border-color: var(--kuning);background: rgba(245, 158, 11, 0.1); }
+
+.putusan__judul { font-weight: 700; }
+.putusan__isi   { color: var(--teks-redup); margin-top: 0.25rem; }
+
+/* ------------------------------------------------------------------
+ |  Daftar kontrol
+ * ------------------------------------------------------------------ */
+
+.baris-alat {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.baris-alat > * { flex: 1 1 auto; }
+
+.pilih {
+    background: var(--panel-2);
+    color: var(--teks);
+    border: 1px solid var(--accent);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    font-size: 0.875rem;
+    font-family: inherit;
+    max-width: 100%;
+}
+
+.catatan {
+    font-size: 0.75rem;
+    color: var(--teks-redup);
+    border-left: 2px solid var(--kuning);
+    padding-left: 0.625rem;
+}
+
+.kosong {
+    padding: 1rem;
+    text-align: center;
+    color: var(--teks-redup);
+    font-size: 0.875rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .meter__jarak { transition: none; }
+}
+
+/* ------------------------------------------------------------------
+ |  LINTAS-UI: SUDUT MEMBULAT DASAR
+ |  Jaring pengaman radius (lihat siswa.css/admin.css). Spesifisitas
+ |  nol lewat :where() supaya tidak menimpa gaya apa pun yang sudah ada.
+ * ------------------------------------------------------------------ */
+:where(
+    button, .btn, [class*="btn"],
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+    select, textarea,
+    img, video, table, pre, code, kbd, blockquote, figure,
+    [class*="card"], [class*="panel"], [class*="chip"], [class*="tag"],
+    [class*="badge"], [class*="pill"], [class*="thumb"], [class*="tile"],
+    [class*="box"], [class*="alert"], [class*="toast"], [class*="note"],
+    [class*="avatar"], [class*="banner"], [class*="hero"], [class*="stat"],
+    [class*="kpi"], [class*="item"], [class*="list"], [class*="cover"],
+    [class*="seg"], [class*="switch"], [class*="input"], [class*="field"],
+    [class*="row"], [class*="table"]
+) {
+    border-radius: var(--r-sm, 10px);
+}

@@ -1,0 +1,33 @@
+# ==========================================================
+#  uploads/.htaccess -LARANG EKSEKUSI SCRIPT
+#  Folder ini hanya boleh menyimpan file gambar (jpg/png/webp).
+# ==========================================================
+
+Options -Indexes -ExecCGI
+
+# Matikan semua handler yang bisa mengeksekusi kode
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .pht .phar .cgi .pl .py .sh
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .pht .phar
+
+# Paksa file unknowable dianggap sebagai binary (tidak dieksekusi server)
+<IfModule mod_mime.c>
+    AddType text/plain .php .phtml .php3 .php4 .php5 .php7 .php8 .pht .phar
+    AddHandler default-handler .php .phtml .phar
+</IfModule>
+
+# Tolak akses ke file executable (403 Forbidden)
+<FilesMatch "\.(php|phtml|php[0-9]|pht|phar|cgi|pl|py|sh|htaccess|htpasswd|ini|log|sh|exe|bat|cmd|com|scr|msi)$">
+    Require all denied
+</FilesMatch>
+
+# Hanya izinkan tipe gambar sebagai media
+<IfModule mod_mime.c>
+    AddType image/jpeg .jpg .jpeg
+    AddType image/png .png
+    AddType image/webp .webp
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set Content-Disposition "inline"
+</IfModule>
