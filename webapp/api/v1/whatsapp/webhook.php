@@ -37,9 +37,13 @@ function wa_env(string $key, string $fallback = ''): string
     return $fallback;
 }
 
+$provider = strtolower(wa_env('WHATSAPP_PROVIDER', 'meta'));
 $verifyToken = wa_env('WHATSAPP_VERIFY_TOKEN', 'presensi-verify-token');
 $accessToken = wa_env('WHATSAPP_ACCESS_TOKEN');
 $phoneNumberId = wa_env('WHATSAPP_PHONE_NUMBER_ID');
+$evolutionUrl = wa_env('EVOLUTION_URL', 'http://localhost:8081');
+$evolutionKey = wa_env('EVOLUTION_API_KEY', 'hackathon-key');
+$evolutionInstance = wa_env('EVOLUTION_INSTANCE', 'presensi');
 
 // --- Verification (GET) ---
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') {
@@ -69,16 +73,31 @@ if (!is_array($payload)) {
     exit;
 }
 
-// Extract message
+// Extract message (support Meta Cloud API + Evolution API formats)
 $messageText = '';
 $from = '';
-foreach ($payload['entry'] ?? [] as $entry) {
-    foreach ($entry['changes'] ?? [] as $change) {
-        $value = $change['value'] ?? [];
-        foreach ($value['messages'] ?? [] as $msg) {
-            if (($msg['type'] ?? '') === 'text') {
-                $messageText = trim((string) ($msg['text']['body'] ?? ''));
-                $from = (string) ($msg['from'] ?? '');
+if ($provider === 'evolution') {
+    // Evolution API format
+    $data = $payload['data'] ?? [];
+    $key = $data['key'] ?? [];
+    $from = (string) ($key['remoteJid'] ?? '');
+    $from = str_replace('@s.whatsapp.net', '', $from);
+    $from = str_replace('@g.us', '', $from);
+    if (isset($data['message']['conversation'])) {
+        $messageText = trim((string) $data['message']['conversation']);
+    } elseif (isset($data['message']['extendedTextMessage']['text'])) {
+        $messageText = trim((string) $data['message']['extendedTextMessage']['text']);
+    }
+} else {
+    // Meta Cloud API format
+    foreach ($payload['entry'] ?? [] as $entry) {
+        foreach ($entry['changes'] ?? [] as $change) {
+            $value = $change['value'] ?? [];
+            foreach ($value['messages'] ?? [] as $msg) {
+                if (($msg['type'] ?? '') === 'text') {
+                    $messageText = trim((string) ($msg['text']['body'] ?? ''));
+                    $from = (string) ($msg['from'] ?? '');
+                }
             }
         }
     }
@@ -122,8 +141,29 @@ if ($res !== false && $httpCode === 200) {
 // Trim for WhatsApp (max 4096 chars)
 $answer = mb_substr($answer, 0, 4000);
 
-// Send reply via WhatsApp Cloud API
-if ($accessToken !== '' && $phoneNumberId !== '') {
+// Send reply
+if ($provider === 'evolution') {
+    // Evolution API (Baileys-based, self-hosted)
+    $sendUrl = rtrim($evolutionUrl, '/') . '/message/sendText/' . $evolutionInstance;
+    $sendPayload = [
+        'number' => $from,
+        'text' => $answer,
+    ];
+    $ch = curl_init($sendUrl);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($sendPayload),
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'apikey: ' . $evolutionKey,
+        ],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 30,
+    ]);
+    curl_exec($ch);
+    curl_close($ch);
+} elseif ($accessToken !== '' && $phoneNumberId !== '') {
+    // Meta Cloud API (official)
     $sendUrl = "https://graph.facebook.com/v18.0/{$phoneNumberId}/messages";
     $sendPayload = [
         'messaging_product' => 'whatsapp',
