@@ -270,6 +270,27 @@ grep -RIn --exclude-dir=.git -E "(sk-|nvapi-|akaugpd)" . 2>/dev/null || echo "cl
 
 ---
 
+## 📱 WhatsApp Bot (Opsional)
+
+Orang tua bisa tanya kehadiran anak via WhatsApp. Agent membalas otomatis.
+
+### Setup
+1. Buat app di https://developers.facebook.com → WhatsApp → Cloud API
+2. Set Webhook URL: `https://yourdomain.com/api/v1/whatsapp/webhook.php`
+3. Set Verify Token (di `.env`: `WHATSAPP_VERIFY_TOKEN`)
+4. Subscribe to "messages"
+5. Set di `.env`:
+   ```
+   WHATSAPP_VERIFY_TOKEN=presensi-verify-token
+   WHATSAPP_ACCESS_TOKEN=your-meta-access-token
+   WHATSAPP_PHONE_NUMBER_ID=your-phone-number-id
+   ```
+
+### Cara Kerja
+- Orang tua chat: "Apakah Andi sudah pulang?"
+- Webhook terima → panggil agent → query Zetaris → balas via WhatsApp API
+- Jawaban instan, real-time
+
 ## 🆘 Troubleshooting
 
 | Masalah | Solusi |
