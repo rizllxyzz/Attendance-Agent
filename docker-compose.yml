@@ -23,7 +23,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "80:80"
+      - "8081:80"
     volumes:
       - ./webapp:/var/www/html
     environment:
@@ -67,8 +67,11 @@ services:
     profiles: ["whatsapp"]
     environment:
       AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-hackathon-key}
+      WEBHOOK_GLOBAL_ENABLED: "true"
+      WEBHOOK_GLOBAL_URL: "http://web/api/v1/whatsapp/webhook.php"
+      WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: "true"
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8082:8080"
     volumes:
       - evolution_data:/evolution/store
 

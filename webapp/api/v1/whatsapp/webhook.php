@@ -41,9 +41,13 @@ $provider = strtolower(wa_env('WHATSAPP_PROVIDER', 'meta'));
 $verifyToken = wa_env('WHATSAPP_VERIFY_TOKEN', 'presensi-verify-token');
 $accessToken = wa_env('WHATSAPP_ACCESS_TOKEN');
 $phoneNumberId = wa_env('WHATSAPP_PHONE_NUMBER_ID');
-$evolutionUrl = wa_env('EVOLUTION_URL', 'http://localhost:8081');
+$evolutionUrl = wa_env('EVOLUTION_URL', 'http://evolution:8080');
 $evolutionKey = wa_env('EVOLUTION_API_KEY', 'hackathon-key');
 $evolutionInstance = wa_env('EVOLUTION_INSTANCE', 'presensi');
+$webhookToken = wa_env('WHATSAPP_WEBHOOK_TOKEN');
+if ($webhookToken !== '' && !hash_equals($webhookToken, (string) ($_SERVER['HTTP_X_WHATSAPP_WEBHOOK_TOKEN'] ?? ''))) {
+    http_response_code(401); exit('Unauthorized');
+}
 
 // --- Verification (GET) ---
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') {
@@ -77,6 +81,7 @@ if (!is_array($payload)) {
 $messageText = '';
 $from = '';
 if ($provider === 'evolution') {
+    if (($payload['data']['key']['fromMe'] ?? false) === true) { http_response_code(200); echo json_encode(['status' => 'ignored_self']); exit; }
     // Evolution API format
     $data = $payload['data'] ?? [];
     $key = $data['key'] ?? [];
@@ -123,7 +128,7 @@ $ch = curl_init($agentUrl);
 curl_setopt_array($ch, [
     CURLOPT_POST => true,
     CURLOPT_POSTFIELDS => json_encode(['question' => $question]),
-    CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+    CURLOPT_HTTPHEADER => array_merge(['Content-Type: application/json'], agent_auth_headers()),
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT => 30,
 ]);
