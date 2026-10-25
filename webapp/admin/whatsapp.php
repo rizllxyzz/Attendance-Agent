@@ -244,10 +244,19 @@ require __DIR__ . '/../templates/admin-head.php';
     });
 
     document.getElementById('btnQR').addEventListener('click', async function() {
+        // Check status first
+        const st = await apiCall('status');
+        const state = (st && st.instance && st.instance.state) || (st && st.state) || '';
+        if (state === 'open') {
+            setStatus('Sudah terhubung', 'WhatsApp sudah terhubung. Tidak perlu scan QR lagi.', true);
+            document.getElementById('qrArea').style.display = 'none';
+            return;
+        }
         // Auto-create instance if not exists
         let res = await apiCall('qr');
         if (res && res.error && (res.error.includes('not found') || res.error.includes('does not exist'))) {
             await apiCall('create');
+            await new Promise(r => setTimeout(r, 1000));
             res = await apiCall('qr');
         }
         const qr = res?.qrcode?.base64 || res?.base64 || res?.code;
