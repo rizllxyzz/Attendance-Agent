@@ -69,10 +69,10 @@
 ---
 
 ### SCENE 4: MASALAH NYATA #3 - "Orang Tua Buta" (0:55-1:05)
-**Visual:** Orang tua di HP, mengetik di WhatsApp group kelas: "Anak saya masuk hari ini?" Tidak ada yang jawab. Guru sibuk.
+**Visual:** Orang tua di HP, mengetik di grup chat kelas: "Anak saya masuk hari ini?" Tidak ada yang jawab. Guru sibuk.
 
 **Narasi:**
-> "Orang tua tidak punya akses. Mereka tanya di grup WhatsApp kelas.
+> "Orang tua tidak punya akses. Mereka tanya di grup chat kelas.
 > 'Anak saya masuk?'
 > 'Pulang jam berapa?'
 > Guru tidak bisa jawab semua. Data ada, tapi tidak bisa diakses."
