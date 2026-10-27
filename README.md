@@ -1,6 +1,12 @@
 ﻿# 🎓 Presensi School - Smart Attendance System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://python.org)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)](Dockerfile)
+[![Hackathon](https://img.shields.io/badge/Open%20Agent%20Hackathon-2026-orange)](https://hackathon.genai.works)
+
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED.svg)](Dockerfile)
 [![Hackathon](https://img.shields.io/badge/Open%20Agent%20Hackathon-2026-orange.svg)](https://hackathon.genai.works)
@@ -11,6 +17,23 @@
 **Sponsors:** Zetaris (data layer) · Meterless Nightshift (AI provider) · NVIDIA (Nemotron) · Cursor (optional)
 
 ---
+
+## Screenshots
+
+### Admin Dashboard
+![Admin Dashboard](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/admin-dashboard.png)
+
+### SmartJournal AI Assistant
+![SmartJournal AI](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/smartjournal-ai.png)
+
+### Face ID Verification
+![Face ID](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/face-id.png)
+
+### Admin Login Page
+![Admin Login](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/login-admin.png)
+
+### Mobile Responsive View
+![Dashboard Mobile](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/dashboard-mobile.png)
 
 ## 📋 Table of Contents
 1. [Features](#-features)
