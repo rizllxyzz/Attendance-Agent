@@ -15,19 +15,16 @@
 
 ## Screenshots
 
-### Admin Dashboard
-![Admin Dashboard](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/admin-dashboard.png)
+### Desktop (Laptop)
+| Admin Dashboard | SmartJournal AI |
+| --- | --- |
+| ![Admin Dashboard](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/admin-dashboard.png) | ![SmartJournal AI](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/smartjournal-ai.png) |
 
-### SmartJournal AI Assistant
-![SmartJournal AI](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/smartjournal-ai.png)
+| Face ID Verification | Admin Login |
+| --- | --- |
+| ![Face ID](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/face-id.png) | ![Admin Login](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/login-admin.png) |
 
-### Face ID Verification
-![Face ID](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/face-id.png)
-
-### Admin Login Page
-![Admin Login](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/login-admin.png)
-
-### Mobile Responsive View
+### Mobile
 ![Dashboard Mobile](https://raw.githubusercontent.com/rizllxyzz/Attendance-Agent/main/assets/dashboard-mobile.png)
 
 ## 📋 Table of Contents
