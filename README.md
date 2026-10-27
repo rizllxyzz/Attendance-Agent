@@ -234,6 +234,14 @@ Detail lengkap: **[SETUP.md](SETUP.md)**
 
 ---
 
+## 🧾 Agent Trace & Logs
+
+Every `/run` response includes a `trace` array showing how the agent reached its answer:
+plan → retrieve → evaluate → revise → report (with timing in ms).
+
+Runtime traces are also written to `logs/` as JSONL (gitignored). Three sample
+input/output pairs are available in `input_examples/` and `output_examples/`.
+
 ## 📜 License
 
 MIT - bebas digunakan, dimodifikasi, dan didistribusikan.
