@@ -1,10 +1,5 @@
 ﻿# 🎓 Presensi School - Smart Attendance System
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://python.org)
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)](Dockerfile)
-[![Hackathon](https://img.shields.io/badge/Open%20Agent%20Hackathon-2026-orange)](https://hackathon.genai.works)
-
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
